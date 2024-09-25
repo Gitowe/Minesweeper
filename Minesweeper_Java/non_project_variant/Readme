@@ -1,0 +1,10 @@
+This version of my Minesweeper program runs on C++
+
+This version is played on the command line, the display and inputs are shown there
+only single button inputs are needed to play
+
+To play, either compile with and then enter ./minesweeper 
+or enter ./run to do both
+
+The powershell sceipt file and makefile are set for Windows 10
+if you plan to run this on linux/mac be sure to modify those to do so
