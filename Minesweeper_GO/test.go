@@ -1,1 +1,9 @@
-//Test file for minesweeper game in go language :D
+// temp file for hello world in go
+
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("Hello, World!")
+}
