@@ -145,7 +145,8 @@ public class Minesweeper {
     private static char charInput(Scanner scanner) {
         while (true) {
             try {
-                char input = scanner.next().toUpperCase().charAt(0);
+                char input = scanner.next().charAt(0);
+                input = Character.toUpperCase(input);
                 return input;
             } catch (InputMismatchException e) {
                 System.out.print("Invalid input. Please try again: ");
@@ -155,7 +156,7 @@ public class Minesweeper {
     }
 
     // Player perspective of game
-    private static void playMinesweeper(Sweeper game) {
+    private static void playMinesweeper(Sweeper game, Scanner scanner) {
         boolean gameOver = false;
         boolean quiteGame = false;
         int currentMoveIndex = 0;
@@ -164,7 +165,6 @@ public class Minesweeper {
         char[][] realBoard = new char[game.getSide()][game.getSide()], shownBoard = new char[game.getSide()][game.getSide()];
 
         setBoard(realBoard, shownBoard, game.getSide());
-        Scanner scanner = new Scanner(System.in);
 
         while (!gameOver) {
             System.out.println("\nCurrent Status of Board:\n\n");
@@ -248,7 +248,6 @@ public class Minesweeper {
                     }
                 } catch (InputMismatchException e) {
                     System.out.print("Invalid input. Please try again: ");
-                    scanner.next();
                 }
             }
         }
@@ -262,7 +261,7 @@ public class Minesweeper {
             if (action == ' ') {continue;}
     
             if (action == 'Y') {
-                gameIntro();
+                gameIntro(scanner);
                 quiteGame = true;
             } else if (action == 'N') {
                 System.out.println("Thanks for playing!\n");
@@ -271,8 +270,6 @@ public class Minesweeper {
                 System.out.println("Invalid input. Please try again.");
             }  
         }
-
-        scanner.close();
     }
 
 
@@ -281,8 +278,7 @@ public class Minesweeper {
     //////////////////////////
 
 
-    private static void custom(Sweeper game) {
-        Scanner scanner = new Scanner(System.in);
+    private static void custom(Sweeper game, Scanner scanner) {
         boolean validInput = false;
 
         System.out.println("\n\nHere are the options to select for a custom difficulty!\n");
@@ -318,11 +314,9 @@ public class Minesweeper {
                 scanner.next();
             }
         }
-        scanner.close();
     }
 
-    private static void difficulty(Sweeper game) {
-        Scanner scanner = new Scanner(System.in);
+    private static void difficulty(Sweeper game, Scanner scanner) {
         boolean validInput = false;
 
         System.out.println("\n\nCurrent difficulty levels");
@@ -359,12 +353,10 @@ public class Minesweeper {
                 scanner.next();
             }
         }
-        scanner.close();
     }
 
-    private static void gameIntro() {
+    private static void gameIntro(Scanner scanner) {
         Sweeper game = new Sweeper(9, 10);
-        Scanner scanner = new Scanner(System.in);
         boolean validChoice = false;
 
         System.out.println("\n\nWelcome to Minesweeper!");
@@ -379,11 +371,11 @@ public class Minesweeper {
                 int choice = scanner.nextInt();
                 switch (choice) {
                     case 1:
-                        difficulty(game);
+                        difficulty(game, scanner);
                         validChoice = true;
                         break;
                     case 2:
-                        custom(game);
+                        custom(game, scanner);
                         validChoice = true;
                         break;
                     default:
@@ -394,13 +386,12 @@ public class Minesweeper {
                 scanner.next();
             }
         }
-        playMinesweeper(game);
-        scanner.close();
+        playMinesweeper(game, scanner);
     }
 
     public static void main(String[] args) {
-        gameIntro();
+        Scanner scanner = new Scanner(System.in);
+        gameIntro(scanner);
+        scanner.close();
     }
-
-
 }
