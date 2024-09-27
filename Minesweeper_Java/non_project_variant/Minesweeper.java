@@ -8,11 +8,18 @@ public class Minesweeper {
     private static final int[] rowOffsets = {-1, -1, 0, 1, 1, 1, 0, -1};
     private static final int[] colOffsets = {0, 1, 1, 1, 0, -1, -1, -1};
 
-    private static boolean isValid(int row, int col, int side) {
+    // Checks if location on board is valid (not outside board or not treated as gridpoint)
+    private static boolean checkSpot(int row, int col, int side) {
         return (row >= 0 && col >= 0 && row < side && col < side);
     }
 
-    private static void setupBoard(char[][] realBoard, char[][] shownBoard, int side) {
+    // Checks if a mine is present at a location
+    private static boolean checkMine(int row, int col, char board[][]) {
+        return (board[row][col] == '*');
+    }
+
+    // Creates board
+    private static void setBoard(char[][] realBoard, char[][] shownBoard, int side) {
         for (int i = 0; i < side; i++) {
             for (int j = 0; j < side; j++) {
                 realBoard[i][j] = '-';
@@ -21,7 +28,11 @@ public class Minesweeper {
         }
     }
 
-    private static void placeMines(int[][] mineStorage, char[][] realBoard, int mines, int side, int firstRow, int firstCol) {
+    // Places mines around the board
+    private static void placeMines(int[][] mineStorage, 
+                                   char[][] realBoard, 
+                                   int mines, int side, int firstRow, int firstCol) 
+    {
         Random random = new Random();
         boolean[] checkOpenSpot = new boolean[MAXSIDE * MAXSIDE];
 
@@ -43,8 +54,10 @@ public class Minesweeper {
         }
     }
 
+    // Displays board
     private static void displayBoard(char[][] board, int side) {
         System.out.print("   ");
+
         for (int i = 1; i <= side; i++) {
             System.out.print(i + " ");
         }
@@ -60,38 +73,54 @@ public class Minesweeper {
         }
     }
 
+    // Counts mines to ensure they are properly implemented
     private static int countMines(int row, int col, char[][] realBoard, int side) {
         int count = 0;
+
         for (int i = 0; i < 8; i++) {
             int newRow = row + rowOffsets[i];
             int newCol = col + colOffsets[i];
-            if (isValid(newRow, newCol, side) && realBoard[newRow][newCol] == '*') {
+            if (checkSpot(newRow, newCol, side) && checkMine(newRow, newCol, realBoard)) {
                 count++;
             }
         }
         return count;
     }
 
-    private static boolean calculateMove(int row, int col, int movesLeft, char[][] shownBoard, char[][] realBoard, int[][] mineStorage, int mines, int side) {
+    // Checks if player has clicked on a mine or not
+    private static boolean calculateMove(int row, int col, int movesLeft, 
+                                         char[][] shownBoard, char[][] realBoard, 
+                                         int[][] mineStorage, int mines, int side) 
+    {
+        if (shownBoard[row][col] != '-') {
+            return false;
+        }
+    
         if (realBoard[row][col] == '*') {
             shownBoard[row][col] = '*';
+
             for (int i = 0; i < mines; i++) {
                 shownBoard[mineStorage[i][0]][mineStorage[i][1]] = '*';
             }
-            System.out.println("\nCurrent Status of Board:\n\n");
 
+            System.out.println("\nCurrent Status of Board:\n\n");
             displayBoard(shownBoard, side);
+
             System.out.println("\nYou lost!");
             return true;
         } else {
             int mineCount = countMines(row, col, realBoard, side);
+            movesLeft--;
+
             shownBoard[row][col] = (char) (mineCount + '0');
+
             if (mineCount == 0) {
                 for (int i = 0; i < 8; i++) {
                     int newRow = row + rowOffsets[i];
                     int newCol = col + colOffsets[i];
-                    if (isValid(newRow, newCol, side) && realBoard[newRow][newCol] != '*') {
-                        calculateMove(newRow, newCol, shownBoard, realBoard, mineStorage, mines, side, movesLeft);
+
+                    if (checkSpot(newRow, newCol, side) && checkMine(newRow, newCol, realBoard)) {
+                        calculateMove(newRow, newCol, movesLeft, shownBoard, realBoard, mineStorage, mines, side);
                     }
                 }
             }
@@ -99,6 +128,7 @@ public class Minesweeper {
         }
     }
 
+    // Gets numerical input from user
     private static int numInput(Scanner scanner) {
         while (true) {
             if (scanner.hasNextInt()) {
@@ -111,6 +141,7 @@ public class Minesweeper {
         }
     }
 
+    // Gets character input from user
     private static char charInput(Scanner scanner) {
         while (true) {
             try {
@@ -123,21 +154,23 @@ public class Minesweeper {
         }
     }
 
+    // Player perspective of game
     private static void playMinesweeper(Sweeper game) {
-        char[][] realBoard = new char[game.getSide()][game.getSide()];
-        char[][] shownBoard = new char[game.getSide()][game.getSide()];
-        int[][] mineStorage = new int[MAXMINES][2];
-        int movesLeft = game.getSide() * game.getSide() - game.getMines(), x = 0, y = 0;
-        int currentMoveIndex = 0;
         boolean gameOver = false;
+        boolean quiteGame = false;
+        int currentMoveIndex = 0;
+        int movesLeft = game.getSide() * game.getSide() - game.getMines(), x = 0, y = 0;
+        int[][] mineStorage = new int[MAXMINES][2];
+        char[][] realBoard = new char[game.getSide()][game.getSide()], shownBoard = new char[game.getSide()][game.getSide()];
 
-        setupBoard(realBoard, shownBoard, game.getSide());
-
+        setBoard(realBoard, shownBoard, game.getSide());
         Scanner scanner = new Scanner(System.in);
+
         while (!gameOver) {
             System.out.println("\nCurrent Status of Board:\n\n");
             displayBoard(shownBoard, game.getSide());
 
+            // Ask for user input
             System.out.print("\nEnter an action to do (type 'H' to see available actions): ");
             boolean boardEdit = false;
 
@@ -146,6 +179,7 @@ public class Minesweeper {
                     char action = charInput(scanner);
                     if (action == ' ') {continue;}
 
+                    // Case for checking or marking a tile
                     if (action == 'C' || action == 'M') {
                         System.out.print("Enter the column position (x - axis) -> ");
                         y = numInput(scanner) - 1;
@@ -153,15 +187,17 @@ public class Minesweeper {
                         System.out.print("Enter the row position (y - axis) -> ");
                         x = numInput(scanner) - 1;
 
-                        if (x < 0 || x >= side || y < 0 || y >= side) {
+                        if (x < 0 || x >= game.getSide() || y < 0 || y >= game.getSide()) {
                             System.out.print("Invalid position. Please try again: ");
-                            continue;
                             boardEdit = true;
+                            continue;
                         }
                         boardEdit = true;
                     }
 
                     switch (action) {
+
+                        // Check a tile
                         case 'C':
                             if (shownBoard[x][y] != '-') {
                                 System.out.print("The cell has already been opened or marked. Please try again.\n");
@@ -181,6 +217,8 @@ public class Minesweeper {
                                 gameOver = true;
                             }
                             break;
+
+                        // Mark/Unmark a tile
                         case 'M':
                             if (shownBoard[x][y] == '-') {
                                 shownBoard[x][y] = '@';
@@ -188,6 +226,8 @@ public class Minesweeper {
                                 shownBoard[x][y] = '-';
                             }
                             break;
+
+                        // Help menu
                         case 'H':
                             System.out.println("\nAvailable actions:");
                             System.out.println("C - Check a tile");
@@ -197,6 +237,8 @@ public class Minesweeper {
                             
                             System.out.print("Please select one of the available actions: ");
                             break;
+                        
+                        // Quit the game
                         case 'Q':
                             System.out.println("\nQuitting the game...");
                             System.exit(0);
@@ -210,6 +252,27 @@ public class Minesweeper {
                 }
             }
         }
+
+        // User options at end of game
+        while (!quiteGame) {
+
+            System.out.println("\nWould you like to play again? (Y/N): ");
+    
+            char action = charInput(scanner);
+            if (action == ' ') {continue;}
+    
+            if (action == 'Y') {
+                gameIntro();
+                quiteGame = true;
+            } else if (action == 'N') {
+                System.out.println("Thanks for playing!\n");
+                quiteGame = true;
+            } else {
+                System.out.println("Invalid input. Please try again.");
+            }  
+        }
+
+        scanner.close();
     }
 
 
@@ -255,6 +318,7 @@ public class Minesweeper {
                 scanner.next();
             }
         }
+        scanner.close();
     }
 
     private static void difficulty(Sweeper game) {
@@ -295,6 +359,7 @@ public class Minesweeper {
                 scanner.next();
             }
         }
+        scanner.close();
     }
 
     private static void gameIntro() {

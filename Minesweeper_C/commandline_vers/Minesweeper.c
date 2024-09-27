@@ -1,6 +1,6 @@
 #include "Minesweeper.h"
 
-// for context, the board is graphed as such:
+// For context, the board is graphed as such:
 //
 //      -col   +col
 //  -row         V
@@ -13,12 +13,17 @@ int rowOffsets[] = {-1, -1, 0, 1, 1, 1, 0, -1};
 int colOffsets[] = {0, 1, 1, 1, 0, -1, -1, -1};
 
 // Checks if location on board is valid (not outside board or not treated as gridpoint)
-int spotCheck(int row, int col, int side) {
+int checkSpot(int row, int col, int side) {
     return ((row < side) && (col < side) && (row >= 0) && (col >= 0));
 }
 
-// Creates board
-void boardSet(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE], int side) {
+// Checks if a mine is present at a location
+bool checkMine(int row, int col, char board[][MAXSIDE]) {
+    return (board[row][col] == '*');
+}
+
+// Sets the board to be displayed to the player
+void setBoard(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE], int side) {
     srand(time(NULL));
 
     for (int i = 0; i < side; i++) {
@@ -28,106 +33,85 @@ void boardSet(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE], int side) {
     }
 }
 
-// Returns true if mine present
-int mineCheck(int row, int col, char board[][MAXSIDE]) {
-    return (board[row][col] == '*');
-}
-
 // Places mines around the board
-void mineSet(int mineStorage[][2], 
-             char realBoard[][MAXSIDE], 
-             int mines, int side, int firstRow, int firstCol) 
+void placeMines(int mineStorage[][2], 
+                char realBoard[][MAXSIDE], 
+                int mines, int side, int firstRow, int firstCol) 
 {
-    int checkOpenSpot[MAXSIDE * MAXSIDE] = {0};
+    bool checkOpenSpot[MAXSIDE * MAXSIDE] = {0};
 
     for (int i = 0; i < mines;) {
-        int randNum1 = rand() % side;
-        int randNum2 = rand() % side;
+        int randRow = rand() % side;
+        int randCol = rand() % side;
 
-        if ((randNum1 == firstRow && randNum2 == firstCol) || checkOpenSpot[randNum1 * randNum2]) {
+        if ((randRow == firstRow && randCol == firstCol) || checkOpenSpot[randRow * randCol]) {
             continue;
         }
 
-        if (checkOpenSpot[randNum1 * side + randNum2] == 0) {
-            mineStorage[i][0] = randNum1;
-            mineStorage[i][1] = randNum2;
-
+        if (checkOpenSpot[randRow * side + randCol] == false) {
+            mineStorage[i][0] = randRow;
+            mineStorage[i][1] = randCol;
             realBoard[mineStorage[i][0]][mineStorage[i][1]] = '*';
-            checkOpenSpot[randNum1 * side + randNum2] = 1;
+            checkOpenSpot[randRow * side + randCol] = true;
             i++;
         }
     }
 }
 
 // Displays board
-void display(char shownBoard[][MAXSIDE], int side) {
+void displayBoard(char shownBoard[][MAXSIDE], int side) {
     printf("   ");
 
     if (side <= 9) {
-        for (int i = 0; i < side; i++) {
-            printf("%d ", i + 1);
-        }
+        for (int i = 0; i < side; i++) {printf("%d ", i + 1);}
         printf("\n");
 
         for (int i = 0; i < side; i++) {
             printf("%d  ", i + 1);
-
-            for (int j = 0; j < side; j++) {
-                printf("%c ", shownBoard[i][j]);
-            }
+            for (int j = 0; j < side; j++) {printf("%c ", shownBoard[i][j]);}
             printf("\n");
         }
 
     } else {
         for (int i = 0; i < side; i++) {
-            if (i <= 8) {
-                printf("%d  ", i + 1);
-            } else {
-                printf("%d ", i + 1);
-            }
+            if (i <= 8) {printf("%d  ", i + 1);} 
+            else {printf("%d ", i + 1); }
         }
-
         printf("\n");
 
         for (int i = 0; i < side; i++) {
-            if (i <= 8) {
-                printf("%d  ", i + 1);
-            } else {
-                printf("%d ", i + 1);
-            }
+            if (i <= 8) {printf("%d  ", i + 1);} 
+            else {printf("%d ", i + 1);}
 
-            for (int j = 0; j < side; j++) {
-                printf("%c  ", shownBoard[i][j]);
-            }
+            for (int j = 0; j < side; j++) {printf("%c  ", shownBoard[i][j]);}
             printf("\n");
         }
     }
 }
 
 // Counts mines to ensure they are properly implemented
-int mineCounter(int row, int col, char realBoard[][MAXSIDE], int side) {
+int countMines(int row, int col, char realBoard[][MAXSIDE], int side) {
     int count = 0;
 
-    // Iterate through all possible neighbors
+    // Iterate through all eight possible neighbors
     for (int i = 0; i < 8; ++i) {
         int newRow = row + rowOffsets[i];
         int newCol = col + colOffsets[i];
 
-        if (spotCheck(newRow, newCol, side) && mineCheck(newRow, newCol, realBoard)) {
+        if (checkSpot(newRow, newCol, side) && checkMine(newRow, newCol, realBoard)) {
             count++;
         }
     }
-
     return count;
 }
 
-// Checks if player has clicked on mine or not
-bool calcMinesweeper(int row, int col, int *movesLeft, 
-                    char shownBoard[][MAXSIDE], char realBoard[][MAXSIDE], 
-                    int mineStorage[][2], int mines, int side) 
+// Checks if player has clicked on a mine or not
+bool calculateMove(int row, int col, int *movesLeft, 
+                   char shownBoard[][MAXSIDE], char realBoard[][MAXSIDE], 
+                   int mineStorage[][2], int mines, int side) 
 {
     if (shownBoard[row][col] != '-') {
-        return 0;
+        return false;
     }
 
     if (realBoard[row][col] == '*') {
@@ -138,28 +122,28 @@ bool calcMinesweeper(int row, int col, int *movesLeft,
         }
 
         printf("\nCurrent Status of Board:\n\n");
-        display(shownBoard, side);
+        displayBoard(shownBoard, side);
 
         printf("\nYou lost!\n");
-        return 1;
-    }
-    else {
-        int count = mineCounter(row, col, realBoard, side);
+        return true;
+
+    } else {
+        int mineCount = countMines(row, col, realBoard, side);
         (*movesLeft)--;
 
-        shownBoard[row][col] = count + '0';
+        shownBoard[row][col] = mineCount + '0';
 
-        if (count == 0) {
+        if (mineCount == 0) {
             for (int i = 0; i < 8; ++i) {
                 int newRow = row + rowOffsets[i];
                 int newCol = col + colOffsets[i];
 
-                if (spotCheck(newRow, newCol, side) && !mineCheck(newRow, newCol, realBoard)) {
-                    calcMinesweeper(newRow, newCol, movesLeft, shownBoard, realBoard, mineStorage, mines, side);
+                if (checkSpot(newRow, newCol, side) && !checkMine(newRow, newCol, realBoard)) {
+                    calculateMove(newRow, newCol, movesLeft, shownBoard, realBoard, mineStorage, mines, side);
                 }
             }
         }
-        return 0;
+        return false;
     }
 }
 
@@ -167,8 +151,9 @@ bool calcMinesweeper(int row, int col, int *movesLeft,
 int numInput() {
     int input;
     bool validInput = false;
+
     while (!validInput) {
-        if (!scanf("%d*[^\n]", input)) {
+        if (!scanf("%d*[^\n]", &input)) {
             while (getchar() != '\n');
             printf("Invalid input number. Please try again: ");
         } else {
@@ -176,10 +161,10 @@ int numInput() {
             validInput = true;
         }
     }
-    getchar();
     return 0;
 }
 
+// Gets character input from user
 char charInput() {
     char inputBuffer[100] = {0};
     char input = ' ';
@@ -196,27 +181,25 @@ char charInput() {
 void playMinesweeper(Sweeper *game) {
     bool gameOver = false;
     bool quiteGame = false;
-    char realBoard[MAXSIDE][MAXSIDE], shownBoard[MAXSIDE][MAXSIDE];
-    int movesLeft = game->side * game->side - game->mines, x, y;
-    int mineStorage[MAXSIDE * MAXSIDE][2];
-
-    boardSet(realBoard, shownBoard, game->side);
-
     int currentMoveIndex = 0;
+    int movesLeft = game->side * game->side - game->mines, x, y;    
+    int mineStorage[MAXSIDE * MAXSIDE][2];
+    char realBoard[MAXSIDE][MAXSIDE], shownBoard[MAXSIDE][MAXSIDE];
 
-    getchar();
+    setBoard(realBoard, shownBoard, game->side);
 
     while (!gameOver) {
         printf("\nCurrent Status of Board:\n\n");
-        display(shownBoard, game->side);
+        displayBoard(shownBoard, game->side);
 
         // Ask for user input
         printf("\nEnter an action to do (type 'H' to see available actions): ");
         bool boardEdit = false;
+        getchar();
 
         while (!boardEdit) {
 
-            char action = charInput(&action);
+            char action = charInput();
             if (action == ' ') {continue;}
 
             // Case for checking or marking a tile
@@ -235,10 +218,31 @@ void playMinesweeper(Sweeper *game) {
                     continue;
                 }
                 boardEdit = true;
+                //getchar();
             }
 
+            // Check a tile
+            if (action == 'C') {
+                if (shownBoard[x][y] != '-') {
+                    printf("The cell has already been opened or marked. Please try again.\n");
+                    continue;
+                }
+
+                if (currentMoveIndex == 0) {
+                    placeMines(mineStorage, realBoard, game->mines, game->side, x, y);
+                }
+
+                currentMoveIndex++;
+                gameOver = calculateMove(x, y, &movesLeft, shownBoard, realBoard, mineStorage, game->mines, game->side);
+
+                // Check if player won
+                if (!gameOver && movesLeft == 0) {
+                    printf("\nYou won!\n");
+                    gameOver = true;
+                }
+
             // Mark/Unmark a tile
-            if (action == 'M') {
+            } else if (action == 'M') {
                 if (shownBoard[x][y] == '-') {
                     shownBoard[x][y] = '@';
                 } else if (shownBoard[x][y] == '@') {
@@ -246,26 +250,6 @@ void playMinesweeper(Sweeper *game) {
                 } else {
                     printf("Cannot mark this tile. Please try again.\n");
                     continue;
-                }
-
-            // Check a tile
-            } else if (action == 'C') {
-                if (shownBoard[x][y] != '-') {
-                    printf("The cell has already been opened or marked. Please try again.\n");
-                    continue;
-                }
-
-                if (currentMoveIndex == 0) {
-                    mineSet(mineStorage, realBoard, game->mines, game->side, x, y);
-                }
-
-                currentMoveIndex++;
-                gameOver = calcMinesweeper(x, y, &movesLeft, shownBoard, realBoard, mineStorage, game->mines, game->side);
-
-                // Check if player won
-                if (!gameOver && movesLeft == 0) {
-                    printf("\nYou won!\n");
-                    gameOver = true;
                 }
 
             // Help menu
@@ -290,11 +274,10 @@ void playMinesweeper(Sweeper *game) {
     }
 
     // User options at end of game
+    printf("\nWould you like to play again? (Y/N): ");
     while (!quiteGame) {
 
-        printf("\nWould you like to play again? (Y/N): ");
-
-        char action = charInput(&action);
+        char action = charInput();
         if (action == ' ') {continue;}
 
         if (action == 'Y') {

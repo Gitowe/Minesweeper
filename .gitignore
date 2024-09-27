@@ -1,0 +1,7 @@
+.vscode/c_cpp_properties.json
+.vscode/settings.json
+.vscode/tasks.json
+Minesweeper_CPP/ncurse_vers/minesweeper.exe
+Minesweeper_CPP/commandline_vers/minesweeper.exe
+Minesweeper_C/commandline_vers/minesweeper.exe
+Minesweeper_Java/non_project_variant/Minesweeper.class

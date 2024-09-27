@@ -1,7 +1,7 @@
 #include "Minesweeper.h"
 using namespace std;
 
-// for context, the board is graphed as such:
+// For context, the board is graphed as such:
 //
 //      -col   +col
 //  -row
@@ -9,26 +9,31 @@ using namespace std;
 //  +row
 //
 
-// global variables for offset positioning
+// Global variables for offset positioning
 const int rowOffsets[] = {-1, -1, 0, 1, 1, 1, 0, -1};
 const int colOffsets[] = {0, 1, 1, 1, 0, -1, -1, -1};
 
 Sweeper::Sweeper() {}
 
-// functions that set the side and mines
+// Functions that set the side and mines
 void Sweeper::setSide(int s) {side = s;}
 
 void Sweeper::setMines(int m) {mines = m;}
 
 int Sweeper::getSide() {return side;}
 
-// Checks if a spot is valid
-bool Sweeper::spotCheck(int row, int col) {
+// Checks if location on board is valid (not outside board or not treated as gridpoint)
+bool Sweeper::checkSpot(int row, int col) {
     return ((row < side) && (col < side) && (row >= 0) && (col >= 0));
 }
 
+// Checks if a mine is present at a given location
+bool Sweeper::checkMine(int row, int col, char board[][MAXSIDE]) {
+    return (board[row][col] == '*');
+}
+
 // Sets the board to be displayed to the player
-void Sweeper::boardSet(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE]) {
+void Sweeper::setBoard(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE]) {
     srand(time(NULL));
 
     for (int i = 0; i < side; i++) {
@@ -36,21 +41,13 @@ void Sweeper::boardSet(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE]) {
             shownBoard[i][j] = realBoard[i][j] = '-';
         }
     }
-
-    return;
-}
-
-// Checks if a mine is present at a given location
-bool Sweeper::mineCheck(int row, int col, char board[][MAXSIDE]) {
-    if (board[row][col] == '*') {
-        return (true);
-    } else {
-        return (false);
-    }
 }
 
 // Places mines randomly on the board
-void Sweeper::mineSet(int mineStorage[][2], int firstRow, int firstCol, char realBoard[][MAXSIDE]) {
+void Sweeper::placeMines(int mineStorage[][2], 
+                         char realBoard[][MAXSIDE], 
+                         int firstRow, int firstCol) {
+
     bool checkOpenSpot[MAXSIDE * MAXSIDE];
     memset(checkOpenSpot, false, sizeof(checkOpenSpot));
 
@@ -65,67 +62,49 @@ void Sweeper::mineSet(int mineStorage[][2], int firstRow, int firstCol, char rea
         if (checkOpenSpot[randNum1 * randNum2] == false) {
             mineStorage[i][0] = randNum1;
             mineStorage[i][1] = randNum2;
-
             realBoard[mineStorage[i][0]][mineStorage[i][1]] = '*';
             checkOpenSpot[randNum1 * randNum2] = true;
             i++;
         }
     }
-
-    return;
 }
 
 // Displays the board
-void Sweeper::display(char shownBoard[][MAXSIDE]) {
+void Sweeper::displayBoard(char shownBoard[][MAXSIDE]) {
     cout << "   ";
 
     // Print column numbers
     if (side <= 9) {
-        for (int i = 0; i < side; i++) {
-            cout << i + 1 << " ";
-        }
+        for (int i = 0; i < side; i++) {cout << i + 1 << " ";}
         cout << endl;
 
         for (int i = 0; i < side; i++) {
             cout << i + 1 << "  ";
-
-            for (int j = 0; j < side; j++) {
-                cout << shownBoard[i][j] << " ";
-            }
+            for (int j = 0; j < side; j++) {cout << shownBoard[i][j] << " ";}
             cout << endl;
         }
 
     // Print column numbers
     } else {
         for (int i = 0; i < side; i++) {
-            if (i <= 8) {
-                cout << i + 1 << "  ";
-            } else {
-                cout << i + 1 << " ";
-            }
+            if (i <= 8) {cout << i + 1 << "  ";}
+            else {cout << i + 1 << " ";}
         }
-
         cout << endl;
 
         // Print row numbers
         for (int i = 0; i < side; i++) {
-            if (i <= 8) {
-                cout << i + 1 << "  ";
-            } else {
-                cout << i + 1 << " ";
-            }
+            if (i <= 8) {cout << i + 1 << "  ";} 
+            else {cout << i + 1 << " ";}
 
-            for (int j = 0; j < side; j++) {
-                cout << shownBoard[i][j] << "  ";
-            }
+            for (int j = 0; j < side; j++) {cout << shownBoard[i][j] << "  ";}
             cout << endl;
         }
     }
-    return;
 }
 
 // Counts the number of mines around a given cell
-int Sweeper::mineCounter(int row, int col, char realBoard[][MAXSIDE]) {
+int Sweeper::countMines(int row, int col, char realBoard[][MAXSIDE]) {
 
     int count = 0;
 
@@ -134,7 +113,7 @@ int Sweeper::mineCounter(int row, int col, char realBoard[][MAXSIDE]) {
         int newRow = row + rowOffsets[i];
         int newCol = col + colOffsets[i];
 
-        if (spotCheck(newRow, newCol) && mineCheck(newRow, newCol, realBoard)) {
+        if (checkSpot(newRow, newCol) && checkMine(newRow, newCol, realBoard)) {
             count++;
         }
     }
@@ -143,9 +122,9 @@ int Sweeper::mineCounter(int row, int col, char realBoard[][MAXSIDE]) {
 }
 
 // Checks if the player has clicked a mine
-bool Sweeper::calcMinesweeper(int row, int col, int *movesLeft, 
-                              char shownBoard[][MAXSIDE], char realBoard[][MAXSIDE], 
-                              int mineStorage[][2]) 
+bool Sweeper::calculateMove(int row, int col, int *movesLeft, 
+                            char shownBoard[][MAXSIDE], char realBoard[][MAXSIDE], 
+                            int mineStorage[][2]) 
 {
     if (shownBoard[row][col] != '-') {
         return (false);
@@ -159,13 +138,13 @@ bool Sweeper::calcMinesweeper(int row, int col, int *movesLeft,
         }
 
         cout << endl << "Current Status of Board : " << endl << endl;
-        display(shownBoard);
+        displayBoard(shownBoard);
 
         cout << endl << "You lost!" << endl;
         return (true);
     }
     else {
-        int count = mineCounter(row, col, realBoard);
+        int count = countMines(row, col, realBoard);
         (*movesLeft)--;
 
         shownBoard[row][col] = count + '0';
@@ -175,8 +154,8 @@ bool Sweeper::calcMinesweeper(int row, int col, int *movesLeft,
                 int newRow = row + rowOffsets[i];
                 int newCol = col + colOffsets[i];
 
-                if (spotCheck(newRow, newCol) && !mineCheck(newRow, newCol, realBoard)) {
-                    calcMinesweeper(newRow, newCol, movesLeft, shownBoard, realBoard, mineStorage);
+                if (checkSpot(newRow, newCol) && !checkMine(newRow, newCol, realBoard)) {
+                    calculateMove(newRow, newCol, movesLeft, shownBoard, realBoard, mineStorage);
                 }
             }
         }
@@ -184,6 +163,7 @@ bool Sweeper::calcMinesweeper(int row, int col, int *movesLeft,
     }
 }
 
+// Gets numerical input from user
 int Sweeper::numInput() {
     int input;
     bool validInput = false;
@@ -202,6 +182,7 @@ int Sweeper::numInput() {
     return 0;
 }
 
+// Gets character input from user
 char Sweeper::charInput() {
     string input;
     char action = ' ';
@@ -224,24 +205,21 @@ char Sweeper::charInput() {
 void Sweeper::playMinesweeper() {
     bool gameOver = false;
     bool quiteGame = false;
-    char realBoard[MAXSIDE][MAXSIDE], shownBoard[MAXSIDE][MAXSIDE];
-    int movesLeft = side * side - mines, x, y;
-    int mineStorage[mines][2];
-
-    boardSet(realBoard, shownBoard);
-    //mineSet(mineStorage, realBoard);
-
     int currentMoveIndex = 0;
+    int movesLeft = side * side - mines, x, y;
+    int mineStorage[MAXSIDE * MAXSIDE][2];
+    char realBoard[MAXSIDE][MAXSIDE], shownBoard[MAXSIDE][MAXSIDE];
 
-    // Loop of the game running (from the player's perspective)
+    setBoard(realBoard, shownBoard);
+
     while (!gameOver) {
         cout << endl << "Current Status of Board : " << endl << endl;
-        display(shownBoard);
+        displayBoard(shownBoard);
 
+        // Ask for user input
         cout << endl << "Enter an action to do (type 'H' to see available actions): ";
         bool boardEdit = false;
 
-        // Loop to ensure outputted messages are more clearly visible
         while (!boardEdit) {
 
             char action = charInput();
@@ -249,7 +227,8 @@ void Sweeper::playMinesweeper() {
             
             // Case for checking or marking a tile
             if (action == 'C' || action == 'M') {
-                cout << "\nEnter the column position (x - axis) -> ";
+                cout << endl 
+                     << "Enter the column position (x - axis) -> ";
                 y = numInput() - 1;
 
                 cout << "Enter the row position (y - axis) -> ";
@@ -265,8 +244,28 @@ void Sweeper::playMinesweeper() {
                 boardEdit = true; 
             }
 
+            // Check a tile
+            if (action == 'C') {
+                if (shownBoard[x][y] != '-') {
+                    cout << "The cell has already been opened or marked. Please try again." << endl;
+                    continue;
+                }
+
+                if (currentMoveIndex == 0) {
+                    placeMines(mineStorage, realBoard, x, y);
+                }
+
+                currentMoveIndex++;
+                gameOver = calculateMove(x, y, &movesLeft, shownBoard, realBoard, mineStorage);
+
+                // Check if player won
+                if (!gameOver && movesLeft == 0) {
+                    cout << endl << "You won!" << endl;
+                    gameOver = true;
+                } 
+
             // Mark/Unmark a tile
-            if (action == 'M') {
+            } else if (action == 'M') {
                 if (shownBoard[x][y] == '-') {
                     shownBoard[x][y] = '@';
                 } else if (shownBoard[x][y] == '@') {
@@ -275,31 +274,11 @@ void Sweeper::playMinesweeper() {
                     cout << "Cannot mark this tile. Please try again." << endl;
                     continue;
                 }
-            }
-
-            // Check a tile
-            else if (action == 'C') {
-                if (shownBoard[x][y] != '-') {
-                    cout << "The cell has already been opened or marked. Please try again." << endl;
-                    continue;
-                }
-
-                if (currentMoveIndex == 0) {
-                    mineSet(mineStorage, x, y, realBoard);
-                }
-
-                currentMoveIndex++;
-                gameOver = calcMinesweeper(x, y, &movesLeft, shownBoard, realBoard, mineStorage);
-
-                // Check if player won
-                if (!gameOver && movesLeft == 0) {
-                    cout << endl << "You won!" << endl;
-                    gameOver = true;
-                } 
 
             // Help menu
             } else if (action == 'H') {
-                cout << "Available actions: " << endl
+                cout << endl
+                     << "Available actions: " << endl
                      << "C - Check a tile" << endl
                      << "M - Mark/Unmark a tile" << endl
                      << "H - See available actions" << endl
@@ -319,7 +298,9 @@ void Sweeper::playMinesweeper() {
         }
     }
 
-    cout << endl << "Would you like to play again? (Y/N): ";
+    // User options at end of game
+    cout << endl 
+         << "Would you like to play again? (Y/N): ";
     while(!quiteGame) {
 
         char action = charInput();

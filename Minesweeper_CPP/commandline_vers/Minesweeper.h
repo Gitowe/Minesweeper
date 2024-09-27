@@ -32,19 +32,19 @@ public:
 
 private:
     // checks the spot (specific locaiton on double array) to make sure its valid
-    bool spotCheck(int row, int column);
+    bool checkSpot(int row, int column);
 
     // functions that keep the mines accounted for
-    bool mineCheck(int row, int column, char anyBoard[][MAXSIDE]);
-    int mineCounter(int row, int column, char realBoard[][MAXSIDE]);
-    void mineSet(int mines[][2], int firstRow, int firstCol, char realBoard[][MAXSIDE]);
+    bool checkMine(int row, int column, char anyBoard[][MAXSIDE]);
+    int countMines(int row, int column, char realBoard[][MAXSIDE]);
+    void placeMines(int mines[][2], char realBoard[][MAXSIDE], int firstRow, int firstCol);
 
     // functions that create/show the board
-    void display(char shownBoard[][MAXSIDE]);
-    void boardSet(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE]);
+    void displayBoard(char shownBoard[][MAXSIDE]);
+    void setBoard(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE]);
 
     // functions that calculate the minesweeper game
-    bool calcMinesweeper(int row, int column, int *movesLeft,
+    bool calculateMove(int row, int column, int *movesLeft,
                          char shownBoard[][MAXSIDE], char realBoard[][MAXSIDE],
                          int mines[][2]);
 

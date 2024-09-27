@@ -1,65 +1,11 @@
 #include "Minesweeper.h"
 using namespace std;
 
-// Function to set a custom difficulty level
-void custom(Sweeper &game) {
-    bool loop = true;
-
-    cout << endl 
-         << endl 
-         << "Here are the options to select for a custom difficulty!!" << endl;
-    cout << "Enter the amount of sides (max is 25, minimum is 1): ";
-
-    while (loop == true) {
-        int input;
-        if (cin >> input) {
-            cin.ignore();
-            if (input > 0 && input <= 25) {
-                game.setSide(input);
-                loop = false;
-            } else {
-                cout << "Invalid amount. Please enter a value between 1 and 25: ";
-            }
-        } else {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Please enter a valid number: ";
-        }
-    }
-
-    cout << endl
-         << "Enter the amount of mines (max is 99, minimum is 1): ";
-
-    loop = true;
-    while (loop == true) {
-        int input;
-        if (cin >> input) {
-            cin.ignore();
-            if (input > 0 && input < pow(game.getSide(), 2)) {
-                game.setMines(input);
-                loop = false;
-            } else {
-                cout << "Amount entered was too low, too high, or had more mines "
-                        "than spaces available in grid" << endl
-                     << "Please try again: ";
-            }
-            game.setMines(input);
-            loop = false;
-        } else {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Please enter a valid number: ";
-        }
-    }
-    cout << endl << endl;
-}
-
 void difficulty(Sweeper &game) {
     int level;
     bool loop = true;
 
-    cout << endl 
-         << endl
+    cout << endl << endl
          << "Current difficulty levels" << endl;
     cout << "1 - Beginner (9x9 grid, 10 mines)" << endl;
     cout << "2 - Intermediate (16x16 grid, 40 mines)" << endl;
@@ -91,21 +37,74 @@ void difficulty(Sweeper &game) {
             cout << "Please enter a valid number: ";
         }
     }
+    cout << endl;
+}
+
+// Function to set a custom difficulty level
+void custom(Sweeper &game) {
+    bool loop = true;
+
+    cout << endl << endl 
+         << "Custom difficulty selected!" << endl;
+    cout << "Enter the amount of sides (maximum is 25, minimum is 1): ";
+
+    while (loop == true) {
+        int input;
+        if (cin >> input) {
+            cin.ignore();
+            if (input > 0 && input <= 25) {
+                game.setSide(input);
+                loop = false;
+            } else {
+                cout << "Invalid amount. Please enter a value between 1 and 25: ";
+            }
+        } else {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Please enter a valid number: ";
+        }
+    }
+
+    cout << endl << "Enter the amount of mines (maximum is 99, minimum is 1): ";
+
+    loop = true;
+    while (loop == true) {
+        int input;
+        if (cin >> input) {
+            cin.ignore();
+            if (input > 0 && input < pow(game.getSide(), 2)) {
+                game.setMines(input);
+                loop = false;
+            } else {
+                cout << "Amount entered was too low, too high, or had more mines "
+                        "than spaces available in grid" << endl
+                     << "Please try again: ";
+            }
+            game.setMines(input);
+            loop = false;
+        } else {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Please enter a valid number: ";
+        }
+    }
+    cout << endl << endl;
 }
 
 void gameIntro() {
     Sweeper game;
     bool loop = true;
-    
     int input;
+
+    cout << endl << endl 
+         << "Welcome to my Minesweeper game!" << endl;
     cout << endl 
+         << "Current game types" << endl  
+         << "1 - Premade" << endl
+         << "2 - Custom" << endl
          << endl 
-            << "Welcome to my Minesweeper game!" << endl;
-    cout << endl 
-            << "Current game types" << endl  
-            << "1 - Premade" << endl
-            << "2 - Custom" << endl
-            << "Select a game type: ";
+         << "Select a game type: ";
+
     while (loop == true) {
         if (cin >> input) {
             cin.ignore();
@@ -124,15 +123,13 @@ void gameIntro() {
             cout << "Please enter a valid number: ";
         }
     }
-
     game.playMinesweeper();
     loop = false;  // Exit the game after playing once
-
 }
 
 int main() {
     
     gameIntro();
 
-    return (0);
+    return 0;
 }
