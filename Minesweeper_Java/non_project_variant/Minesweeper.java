@@ -10,7 +10,7 @@ public class Minesweeper {
 
     // Checks if location on board is valid (not outside board or not treated as gridpoint)
     private static boolean checkSpot(int row, int col, int side) {
-        return (row >= 0 && col >= 0 && row < side && col < side);
+        return ((row < side) && (col < side) && (row >= 0) && (col >= 0));
     }
 
     // Checks if a mine is present at a location
@@ -22,8 +22,7 @@ public class Minesweeper {
     private static void setBoard(char[][] realBoard, char[][] shownBoard, int side) {
         for (int i = 0; i < side; i++) {
             for (int j = 0; j < side; j++) {
-                realBoard[i][j] = '-';
-                shownBoard[i][j] = '-';
+                shownBoard[i][j] = realBoard[i][j] ='-';
             }
         }
     }
@@ -55,21 +54,33 @@ public class Minesweeper {
     }
 
     // Displays board
-    private static void displayBoard(char[][] board, int side) {
+    private static void displayBoard(char[][] shownBoard, int side) {
         System.out.print("   ");
 
-        for (int i = 1; i <= side; i++) {
-            System.out.print(i + " ");
-        }
-        System.out.println();
+        if (side <= 9) {
+            for (int i = 0; i < side; i++) {System.out.print((i + 1) + " ");}
+            System.out.println();
 
-        for (int i = 0; i < side; i++) {
-            System.out.print((i + 1) + " ");
-            if (i < 9) System.out.print(" ");
-            for (int j = 0; j < side; j++) {
-                System.out.print(board[i][j] + " ");
+            for (int i = 0; i < side; i++) {
+                System.out.print((i + 1) + "  ");
+                for (int j = 0; j < side; j++) {System.out.print(shownBoard[i][j] + " ");}
+                System.out.println();
+            }
+
+        } else {
+            for (int i = 0; i < side; i++) {
+                if (i <= 8) {System.out.print((i + 1) + "  ");} 
+                else {System.out.print((i + 1) + " ");}
             }
             System.out.println();
+
+            for (int i = 0; i < side; i++) {
+                if (i <= 8) {System.out.print((i + 1) + "  ");} 
+                else {System.out.print((i + 1) + " ");}
+
+                for (int j = 0; j < side; j++) {System.out.print(shownBoard[i][j] + "  ");}
+                System.out.println();
+            }
         }
     }
 
@@ -80,6 +91,7 @@ public class Minesweeper {
         for (int i = 0; i < 8; i++) {
             int newRow = row + rowOffsets[i];
             int newCol = col + colOffsets[i];
+
             if (checkSpot(newRow, newCol, side) && checkMine(newRow, newCol, realBoard)) {
                 count++;
             }
@@ -108,6 +120,7 @@ public class Minesweeper {
 
             System.out.println("\nYou lost!");
             return true;
+
         } else {
             int mineCount = countMines(row, col, realBoard, side);
             movesLeft--;
@@ -119,7 +132,7 @@ public class Minesweeper {
                     int newRow = row + rowOffsets[i];
                     int newCol = col + colOffsets[i];
 
-                    if (checkSpot(newRow, newCol, side) && checkMine(newRow, newCol, realBoard)) {
+                    if (checkSpot(newRow, newCol, side) && !checkMine(newRow, newCol, realBoard)) {
                         calculateMove(newRow, newCol, movesLeft, shownBoard, realBoard, mineStorage, mines, side);
                     }
                 }
@@ -187,6 +200,8 @@ public class Minesweeper {
                         System.out.print("Enter the row position (y - axis) -> ");
                         x = numInput(scanner) - 1;
 
+                        System.out.println();
+
                         if (x < 0 || x >= game.getSide() || y < 0 || y >= game.getSide()) {
                             System.out.print("Invalid position. Please try again: ");
                             boardEdit = true;
@@ -213,7 +228,7 @@ public class Minesweeper {
                             
                             movesLeft--;
                             if (!gameOver && movesLeft == 0) {
-                                System.out.println("\nYou won!");
+                                System.out.println("\nYou won!\n");
                                 gameOver = true;
                             }
                             break;
@@ -224,6 +239,9 @@ public class Minesweeper {
                                 shownBoard[x][y] = '@';
                             } else if (shownBoard[x][y] == '@') {
                                 shownBoard[x][y] = '-';
+                            } else {
+                                System.out.print("Cannot mark this tile. Please try again.\n");
+                                continue;
                             }
                             break;
 
@@ -235,13 +253,13 @@ public class Minesweeper {
                             System.out.println("H - See available actions");
                             System.out.println("Q - Quit the game");
                             
-                            System.out.print("Please select one of the available actions: ");
+                            System.out.print("\nPlease select one of the available actions: ");
                             break;
                         
                         // Quit the game
                         case 'Q':
-                            System.out.println("\nQuitting the game...");
-                            System.exit(0);
+                            System.out.println("\nQuitting the game...\n");
+                            quiteGame = true;
                             break;
                         default:
                             System.out.print("Invalid action. Please try again: ");
@@ -253,10 +271,9 @@ public class Minesweeper {
         }
 
         // User options at end of game
+        System.out.println("\nWould you like to play again? (Y/N): ");
         while (!quiteGame) {
 
-            System.out.println("\nWould you like to play again? (Y/N): ");
-    
             char action = charInput(scanner);
             if (action == ' ') {continue;}
     

@@ -24,8 +24,6 @@ bool checkMine(int row, int col, char board[][MAXSIDE]) {
 
 // Sets the board to be displayed to the player
 void setBoard(char realBoard[][MAXSIDE], char shownBoard[][MAXSIDE], int side) {
-    srand(time(NULL));
-
     for (int i = 0; i < side; i++) {
         for (int j = 0; j < side; j++) {
             shownBoard[i][j] = realBoard[i][j] = '-';
@@ -38,6 +36,7 @@ void placeMines(int mineStorage[][2],
                 char realBoard[][MAXSIDE], 
                 int mines, int side, int firstRow, int firstCol) 
 {
+    srand(time(NULL));
     bool checkOpenSpot[MAXSIDE * MAXSIDE] = {0};
 
     for (int i = 0; i < mines;) {
@@ -51,7 +50,7 @@ void placeMines(int mineStorage[][2],
         if (checkOpenSpot[randRow * side + randCol] == false) {
             mineStorage[i][0] = randRow;
             mineStorage[i][1] = randCol;
-            realBoard[mineStorage[i][0]][mineStorage[i][1]] = '*';
+            realBoard[randRow][randCol] = '*';
             checkOpenSpot[randRow * side + randCol] = true;
             i++;
         }
@@ -218,7 +217,6 @@ void playMinesweeper(Sweeper *game) {
                     continue;
                 }
                 boardEdit = true;
-                //getchar();
             }
 
             // Check a tile
@@ -264,7 +262,7 @@ void playMinesweeper(Sweeper *game) {
 
             // Quit the game
             } else if (action == 'Q') {
-                printf("Quitting the game...\n");
+                printf("\nQuitting the game...\n");
                 quiteGame = true;
                 return;
             } else {
