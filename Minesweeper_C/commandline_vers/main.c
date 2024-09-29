@@ -2,7 +2,7 @@
 
 void difficulty(Sweeper *game) {
     int level;
-    int loop = 1;
+    bool loop = true;
 
     printf("\n\nCurrent difficulty levels\n");
     printf("1 - Beginner (9x9 grid, 10 mines)\n");
@@ -16,15 +16,15 @@ void difficulty(Sweeper *game) {
             if (level == 1) {
                 game->side = 9;
                 game->mines = 10;
-                loop = 0;
+                loop = false;
             } else if (level == 2) {
                 game->side = 16;
                 game->mines = 40;
-                loop = 0;
+                loop = false;
             } else if (level == 3) {
                 game->side = 23;
                 game->mines = 99;
-                loop = 0;
+                loop = false;
             } else {
                 printf("Invalid choice. Please select 1, 2, or 3: ");
             }
@@ -33,24 +33,23 @@ void difficulty(Sweeper *game) {
             printf("Please enter a valid number: ");
         }
     }
-    printf("\n");
 }
 
 // Function to set a custom difficulty level
 void custom(Sweeper *game) {
-    int loop = 1;
+    bool loop = true;
 
     printf("\n\nCustom difficulty selected!\n");
-    printf("\nEnter the amount of sides (maximum is 25, minimum is 1): ");
+    printf("\nEnter the amount of sides (maximum is 25, minimum is 2): ");
 
     while (loop) {
         int input;
         if (scanf("%d*[^\n]", &input)) {
-            if (input > 0 && input <= 25) {
+            if (input > 1 && input <= 25) {
                 game->side = input;
-                loop = 0;
+                loop = false;
             } else {
-                printf("Invalid amount. Please enter a value between 1 and 25: ");
+                printf("Invalid amount. Please enter a value between 1 and 26: ");
             }
         } else {
             while (getchar() != '\n');
@@ -58,25 +57,26 @@ void custom(Sweeper *game) {
         }
     }
 
-    printf("\nEnter the amount of mines (maximum is 99, minimum is 1): ");
+    int maxMines = (int) pow(game->side, 2) - 1;
+    if (maxMines > 99) {maxMines = 99;}
 
-    loop = 1;
+    printf("\nEnter the amount of mines (maximum is %d, minimum is 1): ", maxMines);
+
+    loop = true;
     while (loop) {
         int input;
         if (scanf("%d*[^\n]", &input)) {
-            if (input > 0 && input < pow(game->side, 2)) {
+            if (input > 0 && input <= maxMines) {
                 game->mines = input;
-                loop = 0;
+                loop = false;
             } else {
-                printf("Amount entered was too low, too high, or had more mines than spaces available in grid\n");
-                printf("Please try again: ");
+                printf("Invalid amount. Please enter a value between 0 and %d: ", maxMines + 1);
             }
         } else {
             while (getchar() != '\n');
             printf("Please enter a valid number: ");
         }
     }
-    printf("\n");
 }
 
 void gameIntro() {
