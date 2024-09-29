@@ -2,6 +2,7 @@
 #define MINESWEEPER_H
 
 // This is arguably an unnecessary header file, but it's here for the sake of consistency.
+// (And because the C++ version used one.)
 
 #include <stdio.h>
 #include <stdlib.h>

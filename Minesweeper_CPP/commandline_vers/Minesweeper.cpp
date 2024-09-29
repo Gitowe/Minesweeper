@@ -137,7 +137,7 @@ bool Sweeper::calculateMove(int row, int col, int *movesLeft,
             shownBoard[mineStorage[i][0]][mineStorage[i][1]] = '*';
         }
 
-        cout << endl << "Current Status of Board : " << endl << endl;
+        cout << endl << "Final Status of Board : " << endl << endl;
         displayBoard(shownBoard);
 
         cout << endl << "You lost!" << endl;
@@ -211,6 +211,7 @@ void Sweeper::playMinesweeper() {
     char realBoard[MAXSIDE][MAXSIDE], shownBoard[MAXSIDE][MAXSIDE];
 
     setBoard(realBoard, shownBoard);
+    cout << endl;
 
     while (!gameOver) {
         cout << endl << "Current Status of Board : " << endl << endl;
@@ -260,6 +261,11 @@ void Sweeper::playMinesweeper() {
 
                 // Check if player won
                 if (!gameOver && movesLeft == 0) {
+                    cout << endl << "Final Status of Board : " << endl << endl;
+                    for (int i = 0; i < mines; i++) {
+                        shownBoard[mineStorage[i][0]][mineStorage[i][1]] = '@';
+                    }
+                    displayBoard(shownBoard);
                     cout << endl << "You won!" << endl;
                     gameOver = true;
                 } 
@@ -310,10 +316,11 @@ void Sweeper::playMinesweeper() {
             gameIntro();
             quiteGame = true;
         } else if (action == 'N') {
-            cout << "Thanks for playing!" << endl;
+            cout << endl << endl 
+                 << "Thanks for playing!" << endl << endl;
             quiteGame = true;
         } else {
-            cout << "Invalid action. Please try again. ";
+            cout << "Invalid action. Please try again: ";
         }
     }
 

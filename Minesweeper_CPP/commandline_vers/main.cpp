@@ -37,7 +37,6 @@ void difficulty(Sweeper &game) {
             cout << "Please enter a valid number: ";
         }
     }
-    cout << endl;
 }
 
 // Function to set a custom difficulty level
@@ -45,18 +44,19 @@ void custom(Sweeper &game) {
     bool loop = true;
 
     cout << endl << endl 
-         << "Custom difficulty selected!" << endl;
-    cout << "Enter the amount of sides (maximum is 25, minimum is 1): ";
+         << "Custom difficulty selected!" << endl << endl;
+    
+    cout << "Enter the amount of sides (maximum is 25, minimum is 2): ";
 
     while (loop == true) {
         int input;
         if (cin >> input) {
             cin.ignore();
-            if (input > 0 && input <= 25) {
+            if (input > 1 && input <= 25) {
                 game.setSide(input);
                 loop = false;
             } else {
-                cout << "Invalid amount. Please enter a value between 1 and 25: ";
+                cout << "Invalid amount. Please enter a value between 1 and 26: ";
             }
         } else {
             cin.clear();
@@ -65,7 +65,10 @@ void custom(Sweeper &game) {
         }
     }
 
-    cout << endl << "Enter the amount of mines (maximum is 99, minimum is 1): ";
+    int maxMines = (int) pow(game.getSide(), 2) - 1;
+    if (maxMines > 99) {maxMines = 99;}
+
+    cout << endl << "Enter the amount of mines (maximum is " << maxMines << ", minimum is 1): ";
 
     loop = true;
     while (loop == true) {
@@ -76,19 +79,14 @@ void custom(Sweeper &game) {
                 game.setMines(input);
                 loop = false;
             } else {
-                cout << "Amount entered was too low, too high, or had more mines "
-                        "than spaces available in grid" << endl
-                     << "Please try again: ";
+                cout << "Invalid amount. Please enter a value between 0 and " << maxMines + 1 << ": ";
             }
-            game.setMines(input);
-            loop = false;
         } else {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << "Please enter a valid number: ";
         }
     }
-    cout << endl << endl;
 }
 
 void gameIntro() {
